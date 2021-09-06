@@ -54,7 +54,7 @@ impl Processor {
 
         /// move SOL from user wallet to the lootbox wallet
         invoke(
-            &system_instruction::transfer(initializer.key, pda.key, 2000000000),
+            &system_instruction::transfer(initializer.key, &pda, 2000000000),
             &[
                 initializer.clone(),
                 pda_account_info.clone(),
