@@ -27,6 +27,10 @@ impl Processor {
             WPOInstruction::Purchase {amount} => {
                 msg!("Instruction: Purchase");
                 Self::process_purchase(accounts, amount, program_id)
+            },
+            WPOInstruction::Withdraw {} => {
+                msg!("Instruction: Withdraw");
+                Self::process_withdraw(accounts, program_id)
             }
         }
     }
@@ -60,6 +64,39 @@ impl Processor {
                 pda_account_info.clone(),
                 system_program_info.clone(),
             ],
+        )?;
+
+        Ok(())
+    }
+
+    fn process_withdraw(
+        accounts: &[AccountInfo],
+        program_id: &Pubkey,
+    ) -> ProgramResult {
+        let account_info_iter = &mut accounts.iter();
+        let initializer = next_account_info(account_info_iter)?;
+        if !initializer.is_signer {
+            return Err(ProgramError::MissingRequiredSignature);
+        }
+
+        let pda_account_info = next_account_info(account_info_iter)?;
+        let (pda, _bump_seed) = Pubkey::find_program_address(&[b"lootbox"], program_id);
+        if pda != *pda_account_info.key {
+            msg!("Error: Associated address does not match seed derivation");
+            return Err(ProgramError::InvalidSeeds);
+        }
+
+        let system_program_info = next_account_info(account_info_iter)?;
+
+        /// move SOL from user wallet to the lootbox wallet
+        invoke_signed(
+            &system_instruction::transfer(&pda, initializer.key, pda_account_info.lamports),
+            &[
+                pda_account_info.clone(),
+                initializer.clone(),
+                system_program_info.clone(),
+            ],
+            &[&[&b"lootbox"[..], &[bump_seed]]],
         )?;
 
         Ok(())

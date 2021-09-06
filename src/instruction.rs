@@ -12,6 +12,13 @@ pub enum WPOInstruction {
     Purchase {
         amount: u64,
     },
+
+    /// Move all fund from the PDA lootbox wallet to user wallet
+    /// 
+    /// Accounts expected:
+    /// 
+    Withdraw {
+    },
 }
 
 impl WPOInstruction { 
@@ -21,6 +28,9 @@ impl WPOInstruction {
         Ok(match tag {
             0 => Self::Purchase {
                 amount: Self::unpack_amount(rest)?,
+            },
+            1 => Self::Withdraw {
+                
             },
             _ => return Err(InvalidInstruction.into()),
         })
