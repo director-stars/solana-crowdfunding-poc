@@ -10,5 +10,5 @@ use solana_program::{
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub struct WPO {
     pub is_initialized: bool,
-    pub supply: u8 /// number of NFT already minted
+    pub supply: u8
 }
