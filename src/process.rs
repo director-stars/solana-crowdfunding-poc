@@ -90,13 +90,13 @@ impl Processor {
 
         /// move SOL from user wallet to the lootbox wallet
         invoke_signed(
-            &system_instruction::transfer(&pda, initializer.key, pda_account_info.lamports),
+            &system_instruction::transfer(&pda, initializer.key, **pda_account_info.lamports.borrow()),
             &[
                 pda_account_info.clone(),
                 initializer.clone(),
                 system_program_info.clone(),
             ],
-            &[&[&b"lootbox"[..], &[bump_seed]]],
+            &[&[&b"lootbox"[..], &[_bump_seed]]],
         )?;
 
         Ok(())
