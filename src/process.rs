@@ -10,6 +10,8 @@ use solana_program::{
   sysvar::{rent::Rent, Sysvar},
 };
 
+use borsh::{BorshDeserialize, BorshSerialize};
+
 use crate::{error::WPOError, instruction::WPOInstruction, state::WPO};
 
 
@@ -60,7 +62,7 @@ impl Processor {
 
         if wpo_info.supply == 0 {
             msg!("All NFT purchased");
-            return Err(WPOError::SoldOut);
+            return Err(WPOError::SoldOut.into());
         }
 
         wpo_info.supply -= 1;
@@ -121,7 +123,7 @@ impl Processor {
 
         if reciever_account_info.key != wpo_info.admin_wallet {
             msg!("Reciver address not match");
-            return Err(WPOError::NotRightfulReceiver);
+            return Err(WPOError::NotRightfulReceiver.into());
         }
 
         let system_program_info = next_account_info(account_info_iter)?;
