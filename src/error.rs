@@ -8,6 +8,12 @@ pub enum WPOError {
     /// Invalid instruction
     #[error("Invalid Instruction")]
     InvalidInstruction,
+
+    #[error("NFT soldout")]
+    SoldOut,
+
+    #[error("Receiver address not match")]
+    NotRightfulReceiver,
 }
 
 impl From<WPOError> for ProgramError {

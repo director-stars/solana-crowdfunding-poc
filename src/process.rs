@@ -47,12 +47,32 @@ impl Processor {
             return Err(ProgramError::MissingRequiredSignature);
         }
 
+        let wpo_account = next_account_info(account_info_iter)?;
+        if wpo_account.owner != program_id {
+            msg!("WPO account does not have the correct program id");
+            return Err(ProgramError::IncorrectProgramId);
+        }
+
+        let mut wpo_info = WPO::try_from_slice(&wpo_account.data.borrow())?;
+        if !wpo_info.is_initialized() {
+            return Err(ProgramError::UninitializedAccount);
+        } 
+
+        if wpo_info.supply == 0 {
+            msg!("All NFT purchased");
+            return Err(WPOError::SoldOut);
+        }
+
+        wpo_info.supply -= 1;
+        wpo_info.serialize(&mut &mut wpo_account.data.borrow_mut()[..])?;
+
+
         let pda_account_info = next_account_info(account_info_iter)?;
         let (pda, _bump_seed) = Pubkey::find_program_address(&[b"lootbox"], program_id);
         if pda != *pda_account_info.key {
             msg!("Error: Associated address does not match seed derivation");
             return Err(ProgramError::InvalidSeeds);
-        }
+        }        
 
         let system_program_info = next_account_info(account_info_iter)?;
 
@@ -79,6 +99,8 @@ impl Processor {
             return Err(ProgramError::MissingRequiredSignature);
         }
 
+        let reciever_account_info = next_account_info(account_info_iter)?;
+
         let pda_account_info = next_account_info(account_info_iter)?;
         let (pda, _bump_seed) = Pubkey::find_program_address(&[b"lootbox"], program_id);
         if pda != *pda_account_info.key {
@@ -86,14 +108,30 @@ impl Processor {
             return Err(ProgramError::InvalidSeeds);
         }
 
+        let wpo_account = next_account_info(account_info_iter)?;
+        if wpo_account.owner != program_id {
+            msg!("WPO account does not have the correct program id");
+            return Err(ProgramError::IncorrectProgramId);
+        }
+        
+        let wpo_info = WPO::try_from_slice(&wpo_account.data.borrow())?;
+        if !wpo_info.is_initialized() {
+            return Err(ProgramError::UninitializedAccount);
+        } 
+
+        if reciever_account_info.key != wpo_info.admin_wallet {
+            msg!("Reciver address not match");
+            return Err(WPOError::NotRightfulReceiver);
+        }
+
         let system_program_info = next_account_info(account_info_iter)?;
 
         /// move SOL from user wallet to the lootbox wallet
         invoke_signed(
-            &system_instruction::transfer(&pda, initializer.key, **pda_account_info.lamports.borrow()),
+            &system_instruction::transfer(&pda, reciever_account_info.key, **pda_account_info.lamports.borrow()),
             &[
                 pda_account_info.clone(),
-                initializer.clone(),
+                reciever_account_info.clone(),
                 system_program_info.clone(),
             ],
             &[&[&b"lootbox"[..], &[_bump_seed]]],
