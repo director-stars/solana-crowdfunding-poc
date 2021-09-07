@@ -121,7 +121,7 @@ impl Processor {
             return Err(ProgramError::UninitializedAccount);
         } 
 
-        if reciever_account_info.key != wpo_info.admin_wallet {
+        if *reciever_account_info.key != wpo_info.admin_wallet {
             msg!("Reciver address not match");
             return Err(WPOError::NotRightfulReceiver.into());
         }
