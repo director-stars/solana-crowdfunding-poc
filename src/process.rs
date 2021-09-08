@@ -33,7 +33,11 @@ impl Processor {
             WPOInstruction::Withdraw {} => {
                 msg!("Instruction: Withdraw");
                 Self::process_withdraw(accounts, program_id)
-            }
+            },
+            WPOInstruction::Initialize {} => {
+                msg!("Instruction: Initialize");
+                Self::process_initialize(accounts, program_id)
+            },
         }
     }
 
@@ -138,6 +142,38 @@ impl Processor {
             ],
             &[&[&b"lootbox"[..], &[_bump_seed]]],
         )?;
+
+        Ok(())
+    }
+
+    fn process_initialize(
+        accounts: &[AccountInfo],
+        amount: u64,
+        program_id: &Pubkey,
+    ) -> ProgramResult { 
+        let account_info_iter = &mut accounts.iter();
+        let initializer = next_account_info(account_info_iter)?;
+        if !initializer.is_signer {
+            return Err(ProgramError::MissingRequiredSignature);
+        }
+
+        let wpo_account = next_account_info(account_info_iter)?;
+        if wpo_account.owner != program_id {
+            msg!("WPO account does not have the correct program id");
+            return Err(ProgramError::IncorrectProgramId);
+        }
+
+        let mut wpo_info = WPO::try_from_slice(&wpo_account.data.borrow())?;
+        if wpo_info.is_initialized() {
+            return Err(ProgramError::AccountAlreadyInitialized);
+        }
+
+        let admin_account = next_account_info(account_info_iter)?;
+
+        wpo_info.is_initialized = true;
+        wpo_info.supply -= 1;
+        wpo_info.admin_wallet = *admin_wallet.key;
+        wpo_info.serialize(&mut &mut wpo_account.data.borrow_mut()[..])?;
 
         Ok(())
     }

@@ -19,6 +19,12 @@ pub enum WPOInstruction {
     /// 
     Withdraw {
     },
+
+    ///
+    /// 
+    Initialize {
+
+    }
 }
 
 impl WPOInstruction { 
@@ -31,6 +37,9 @@ impl WPOInstruction {
             },
             1 => Self::Withdraw {
                 
+            },
+            2 => Self::Initialize{
+
             },
             _ => return Err(InvalidInstruction.into()),
         })
