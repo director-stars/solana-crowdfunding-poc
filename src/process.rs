@@ -148,7 +148,6 @@ impl Processor {
 
     fn process_initialize(
         accounts: &[AccountInfo],
-        amount: u64,
         program_id: &Pubkey,
     ) -> ProgramResult { 
         let account_info_iter = &mut accounts.iter();
@@ -168,11 +167,11 @@ impl Processor {
             return Err(ProgramError::AccountAlreadyInitialized);
         }
 
-        let admin_account = next_account_info(account_info_iter)?;
+        let admin_account_info = next_account_info(account_info_iter)?;
 
         wpo_info.is_initialized = true;
         wpo_info.supply -= 1;
-        wpo_info.admin_wallet = *admin_wallet.key;
+        wpo_info.admin_wallet = *admin_account_info.key;
         wpo_info.serialize(&mut &mut wpo_account.data.borrow_mut()[..])?;
 
         Ok(())
