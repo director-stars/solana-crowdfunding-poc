@@ -17,7 +17,7 @@ import { clusterApiUrl } from '@solana/web3.js';
 
 export const Web3Provider = ({children}) => {
     // Can be set to 'devnet', 'testnet', or 'mainnet-beta'
-    const network = WalletAdapterNetwork.Devnet;
+    const network = WalletAdapterNetwork.Testnet;
 
     // You can also provide a custom RPC endpoint
     const endpoint = useMemo(() => clusterApiUrl(network), [network]);
