@@ -170,7 +170,7 @@ impl Processor {
         let admin_account_info = next_account_info(account_info_iter)?;
 
         wpo_info.is_initialized = true;
-        wpo_info.supply = 20;
+        wpo_info.supply = 10;
         wpo_info.admin_wallet = *admin_account_info.key;
         wpo_info.serialize(&mut &mut wpo_account.data.borrow_mut()[..])?;
 
